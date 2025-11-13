@@ -90,6 +90,7 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 30
+          overwrite: true
 
   security:
     needs: test-and-lint # only run if main build passes
@@ -108,4 +109,4 @@ jobs:
         run: npm ci
 
       - name: Audit dependencies (fail on critical)
-        run: npm audit --audit-level=moderate
+        run: npm audit --audit-level=critical
