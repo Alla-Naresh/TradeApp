@@ -10,6 +10,37 @@ declare const process: { env: { [key: string]: string | undefined } };
 // lightweight middleware to support environments where a service worker
 // can't be registered (CI variants) only when explicitly requested.
 export default defineConfig({
+  build: {
+    chunkSizeWarningLimit: 500,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('react')) return 'vendor-react';
+            if (id.includes('@mui/x-data-grid')) return 'vendor-datagrid';
+            if (
+              id.includes('@mui/material') ||
+              id.includes('@mui/icons-material') ||
+              id.includes('@emotion')
+            )
+              return 'vendor-mui';
+            if (id.includes('msw')) return 'vendor-msw';
+            return 'vendor';
+          }
+        },
+      },
+    },
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+      },
+      output: {
+        comments: false,
+      },
+    },
+  },
   plugins: [
     react(),
     {
@@ -104,7 +135,8 @@ export default defineConfig({
           try {
             pathname = new URL(req.url as string, 'http://localhost').pathname;
           } catch (e) {
-            // ignore
+            // eslint-disable-next-line no-console
+            console.log('Error ', e);
           }
 
           if (pathname === '/__health') {
@@ -160,7 +192,7 @@ export default defineConfig({
                     });
                   });
                 } catch (e) {
-                  // ignore
+                  console.log('Error ', e);
                 }
               }
 

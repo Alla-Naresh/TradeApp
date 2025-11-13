@@ -30,30 +30,26 @@ async function init() {
       // eslint-disable-next-line no-console
       console.error('MSW worker failed to start', e);
     }
-  }
-
-  // If an API base URL is provided via env (Vite requires VITE_ prefix),
-  // configure the apiClient to use it. This allows running against a real
-  // backend by setting VITE_API_BASE in a .env file or CI environment.
-  // Configure API base and trade path from VITE_API_BASE.
-  try {
-    const apiBase = viteApiBase;
-    if (apiBase) {
-      try {
-        const u = new URL(apiBase);
-        // Use origin as the api client base and the pathname as the trade path
-        // to avoid duplicated path segments (e.g., /trades/trades).
-        setBaseUrl(u.origin);
-        if (u.pathname && u.pathname !== '/') {
-          setTradeBasePath(u.pathname.replace(/\/$/, ''));
+  } else {
+    try {
+      const apiBase = viteApiBase;
+      if (apiBase) {
+        try {
+          const u = new URL(apiBase);
+          // Use origin as the api client base and the pathname as the trade path
+          // to avoid duplicated path segments (e.g., /trades/trades).
+          setBaseUrl(u.origin);
+          if (u.pathname && u.pathname !== '/') {
+            setTradeBasePath(u.pathname.replace(/\/$/, ''));
+          }
+        } catch (_e) {
+          // If parsing fails, fall back to using the raw value as the base.
+          setBaseUrl(apiBase);
         }
-      } catch (_e) {
-        // If parsing fails, fall back to using the raw value as the base.
-        setBaseUrl(apiBase);
       }
+    } catch (_e) {
+      // ignore in environments where import.meta may not be available
     }
-  } catch (_e) {
-    // ignore in environments where import.meta may not be available
   }
 
   createRoot(document.getElementById('root')!).render(
