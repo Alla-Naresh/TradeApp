@@ -8,7 +8,7 @@ node_modules/
 *.lcov
 
 # Lighthouse CI
-.lightouseci/
+.lighthouseci/
 
 # Production
 /dist
