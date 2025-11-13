@@ -1,0 +1,69 @@
+export type ApiError = Error & { status?: number; body?: any };
+
+// Prefer process.env in Node (Jest) for tests. The app's `main.tsx` will call
+// `setBaseUrl` at startup in the browser when `import.meta.env` is available.
+let baseUrl =
+  typeof window === 'undefined'
+    ? // in Node (Jest) prefer process.env; guard using globalThis to avoid
+      // linters/TS errors about an undefined `process` symbol in browser configs
+      ((globalThis as any)?.process?.env as any)?.VITE_API_BASE ||
+      'http://localhost'
+    : window.location?.origin ?? 'http://localhost';
+
+// Log the resolved baseUrl for easier debugging in dev.
+// eslint-disable-next-line no-console
+console.log('API Client baseUrl:', baseUrl);
+export function setBaseUrl(url: string) {
+  baseUrl = url;
+}
+
+function buildUrl(path: string) {
+  if (/^https?:\/\//.test(path)) return path;
+  try {
+    const base = new URL(baseUrl);
+    // If the base contains a pathname beyond the origin (e.g. http://host:3000/trades)
+    // and the requested path begins with a leading slash, append the path
+    // relative to the base pathname instead of resolving from the origin.
+    if (base.pathname && base.pathname !== '/' && path.startsWith('/')) {
+      const baseNoSlash = base.href.replace(/\/$/, '');
+      return baseNoSlash + path;
+    }
+    // default: let URL resolve using origin or base href
+    return new URL(path, base.href).toString();
+  } catch (e) {
+    return new URL(path, baseUrl).toString();
+  }
+}
+
+async function handleResponse(res: Response) {
+  const contentType = res.headers.get('content-type') || '';
+  if (!contentType.includes('application/json')) {
+    const text = await res.text().catch(() => '');
+    const err = new Error(`Unexpected content-type ${contentType}`) as ApiError;
+    err.body = text;
+    err.status = res.status;
+    throw err;
+  }
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(json?.error || 'API Error') as ApiError;
+    err.body = json;
+    err.status = res.status;
+    throw err;
+  }
+  return json;
+}
+
+export async function get<T = any>(path: string) {
+  const res = await fetch(buildUrl(path));
+  return (await handleResponse(res)) as T;
+}
+
+export async function post<T = any>(path: string, body: unknown) {
+  const res = await fetch(buildUrl(path), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  return (await handleResponse(res)) as T;
+}

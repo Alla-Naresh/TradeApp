@@ -1,0 +1,21 @@
+// Centralized runtime configuration derived from Vite env vars.
+// BACKUP of previous file (may contain import.meta). Keep for safe-keeping.
+
+const env = (import.meta as any).env || {};
+
+export const API_BASE: string | undefined = env?.VITE_API_BASE || undefined;
+
+let TRADE_PATH = '/api/trades';
+console.log('API_BASE : ', API_BASE);
+if (API_BASE) {
+  try {
+    console.log('API_BASE : ', API_BASE);
+    const u = new URL(API_BASE);
+    if (u.pathname && u.pathname !== '/')
+      TRADE_PATH = u.pathname.replace(/\/$/, '');
+  } catch (e) {
+    // ignore invalid URL
+  }
+}
+
+export { TRADE_PATH };

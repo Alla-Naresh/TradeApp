@@ -1,0 +1,21 @@
+@startuml
+title Trade Store - Component Interaction
+
+package "UI" {
+  component App
+  component TradesList
+  component TradeForm
+}
+
+package "Mock API" {
+  component MSW
+}
+
+App -> TradesList : route /trades
+App -> TradeForm : route /trades/new or /trades/:id
+TradeForm -> MSW : POST /api/trades
+MSW -> TradesList : returns trades (GET /api/trades)
+TradeForm -> App : dispatch event trade:upserted
+TradesList -> App : listens for trade:upserted -> update row
+
+@enduml
