@@ -11,14 +11,14 @@ async function init() {
   // Read Vite env once for clarity. We intentionally only use `import.meta`
   // inside this browser-only bootstrap file.
   const viteEnv = (import.meta as any).env || {};
-  const enableMsw = viteEnv?.VITE_DISABLE_MSW === 'false';
+  const disableMsw = viteEnv?.VITE_DISABLE_MSW === 'true';
   const viteApiBase = viteEnv?.VITE_API_BASE as string | undefined;
 
   // Start MSW worker in dev only when not explicitly disabled and when
   // there's no external API base configured. If `VITE_API_BASE` is set we
   // prefer talking to the real backend unless the developer explicitly
   // requests MSW via VITE_DISABLE_MSW.
-  if (enableMsw) {
+  if (!disableMsw) {
     try {
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
       const { worker } = await import('./mocks/browser');
