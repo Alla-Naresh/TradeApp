@@ -30,6 +30,9 @@ jobs:
       - name: Run TypeScript type check
         run: npm run typecheck
 
+      - name: Build
+        run: npm run build
+
       - name: Run unit tests with coverage
         run: npm run test
 
@@ -84,5 +87,5 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Audit dependencies
-        run: npm audit --audit-level=high || true
+      - name: Audit dependencies (fail on critical)
+        run: npm audit --audit-level=moderate
