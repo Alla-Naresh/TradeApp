@@ -7,6 +7,9 @@ node_modules/
 /coverage
 *.lcov
 
+# Lighthouse CI
+.lighthouseci/
+
 # Production
 /dist
 /build
