@@ -134,7 +134,7 @@ export default function TradesList() {
       setLoading(true);
       try {
         // request all rows by asking for pageSize == total (fallback to a large number)
-        const fetchSize = total && total > 0 ? total : 10000;
+        const fetchSize = total && total > 0 ? total : 50;
         const res = await listTrades(0, fetchSize, sortModel, filterModel);
         const all = res.data;
         const csv = [

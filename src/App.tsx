@@ -15,8 +15,10 @@ import {
 } from '@mui/material';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
-import TradesList from './pages/TradesList';
-import TradeFormPage from './pages/TradeForm';
+import CircularProgress from '@mui/material/CircularProgress';
+
+const TradesList = React.lazy(() => import('./pages/TradesList'));
+const TradeFormPage = React.lazy(() => import('./pages/TradeForm'));
 
 export default function App() {
   const [mode, setMode] = useState<'light' | 'dark'>('light');
@@ -78,12 +80,20 @@ export default function App() {
         </Toolbar>
       </AppBar>
       <Container sx={{ mt: 4 }}>
-        <Routes>
-          <Route path="/trades" element={<TradesList />} />
-          <Route path="/trades/new" element={<TradeFormPage />} />
-          <Route path="/trades/:id" element={<TradeFormPage />} />
-          <Route path="/" element={<TradesList />} />
-        </Routes>
+        <React.Suspense
+          fallback={
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <CircularProgress />
+            </div>
+          }
+        >
+          <Routes>
+            <Route path="/trades" element={<TradesList />} />
+            <Route path="/trades/new" element={<TradeFormPage />} />
+            <Route path="/trades/:id" element={<TradeFormPage />} />
+            <Route path="/" element={<TradesList />} />
+          </Routes>
+        </React.Suspense>
         <Snackbar
           open={snackOpen}
           autoHideDuration={4000}
